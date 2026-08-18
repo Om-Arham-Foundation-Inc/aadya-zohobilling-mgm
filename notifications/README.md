@@ -1,11 +1,26 @@
 # Zoho Billing Notification Inventory
 
 Local record of the notification/workflow-alert configuration currently set in Zoho Billing for
-**Om Arham Social Welfare Foundation** (organization_id `60036596424`), pulled via the Zoho Billing
-MCP connector on 2026-08-18. Use this to review/edit locally; once changes are agreed we can push
-them back to Zoho Billing (create/update/delete workflow alerts, or update product email templates).
+**Om Arham Social Welfare Foundation** (organization_id `60036596424`, plus a secondary check of
+**Om Arham Test**, `60062715240`), pulled via the Zoho Billing MCP connector on 2026-08-18. Use this
+to review/edit locally; once changes are agreed we can push them back to Zoho Billing
+(create/update/delete workflow alerts, or update product email templates).
 
 Full machine-readable data: [`zoho-billing-notifications-inventory.json`](./zoho-billing-notifications-inventory.json)
+
+## Email alerts specifically: the short answer
+
+**Zero true email-type alerts exist in either org.** The Zoho Billing "Email Alerts" API
+(`List all Email Alerts`) returns every Workflow, but every single one configured in this account -
+across both orgs - has `action_type = "webhook"`, not `alert` (email). So there is currently:
+- no email alert template configured for any entity (Invoice, Subscription, Customer, Payment,
+  Credit Note, Quote),
+- no recipient list for any custom email alert (since none exist),
+- nothing to "turn off"/edit as an email - the 4 alerts below all just fire webhooks.
+
+If subscribers are getting emails today (payment receipts, renewal reminders, etc.), those are
+coming from Zoho Billing's **standard built-in per-module notifications**, not from a custom Email
+Alert - and those built-ins aren't readable via this API (see gap below).
 
 ## What this covers vs. what it doesn't
 
@@ -39,6 +54,14 @@ webhook payload only. If the org expects subscription-lifecycle emails to go out
 exist as custom alerts (they'd either need to come from the standard built-in notifications noted
 above, or a new email-type alert would need to be created).
 
+### Secondary org - "Om Arham Test" (`60062715240`)
+
+| Workflow | Entity | Status | Trigger events | Action type |
+|---|---|---|---|---|
+| SendEventtoBilling (`3389404000000033179`) | Subscriptions | Active | reactivated, unpaid, deleted, renewed, expired, cancelled, downgraded, upgraded, activation | Webhook (not email) |
+
+Same pattern: one active workflow, webhook only, no email template or recipients.
+
 ## Recommended items to review/decide
 
 - [ ] Confirm with Ashish (or current data owner) whether `ADYTrainingManagement` and
@@ -49,6 +72,10 @@ above, or a new email-type alert would need to be created).
       reports) need a manual audit in the Zoho Billing UI, since they're outside API visibility.
 - [ ] Decide whether any entity (Invoice/Customer/Payment/Credit Note/Quote) actually needs a new
       email-type workflow alert, since none exist today.
+- [ ] Since zero custom email alerts exist, decide whether that's expected (all lifecycle emails
+      are meant to come from Zoho's standard built-ins) or a real gap (e.g. no one gets notified
+      by email on subscription cancellation/renewal today, only via the webhook to ADY Training
+      Management / Billing integration).
 
 ## Once decisions are made
 

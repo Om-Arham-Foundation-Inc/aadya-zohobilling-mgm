@@ -8,17 +8,21 @@
       "organization_id": "60036596424",
       "is_default_org": true
     },
-    "other_orgs_in_account_not_covered_by_this_inventory": [
-      {
-        "name": "Om Arham Test",
-        "organization_id": "60062715240"
-      }
-    ],
+    "secondary_organization_checked": {
+      "name": "Om Arham Test",
+      "organization_id": "60062715240",
+      "note": "Also queried for completeness - see 'other_org_workflow_alerts' below."
+    },
     "known_gaps": [
       "Zoho Billing's standard, built-in transactional email notifications (e.g. Invoice Sent/Overdue reminders, Payment Received/Failed/Refunded, Subscription trial-ending/dunning/renewal reminders, Credit Note, Quote) are configured under Settings > Automation > Email Notifications per module and are NOT exposed for read via the connected MCP tools (no list/get endpoint for per-module default notification templates was available). Only custom Workflow-based alerts (Settings > Automation > Workflows) are readable via the 'List all Email Alerts' API, and are recorded below.",
       "No 'list products' tool is exposed either, so per-product email template/recipient overrides (settable via the 'Update Product Email Templates' API) could not be enumerated - that endpoint is write-only from this connector and requires a product_id we don't have a way to look up.",
       "Email alert execution history for the last 3 months (2026-05-01 to 2026-08-18) returned zero entries - none of the workflows below have fired/sent anything recently."
     ]
+  },
+  "email_alerts_summary": {
+    "true_email_type_alerts_found": 0,
+    "explanation": "The 'List all Email Alerts' API returns every Workflow-based alert regardless of its action type (email vs webhook). Across both orgs in this account, every single configured alert has action_type = 'webhook'. Zero alerts have an actual email action (action_type = 'alert' with an email_template). So the true email-alert inventory for this account is currently EMPTY - no custom email alerts exist for any entity (Invoice, Subscription, Customer, Payment, Credit Note, Quote) in either org.",
+    "implication": "Any subscription/invoice/payment emails customers currently receive must be coming from Zoho Billing's standard built-in per-module email notifications (see known_gaps above), not from a custom Email Alert. Those are not visible via this API and need a manual UI check under Settings > Automation > Email Notifications if you want their templates/recipients audited too."
   },
   "workflow_alerts": [
     {
@@ -119,11 +123,45 @@
     "payment",
     "quote"
   ],
+  "other_org_workflow_alerts": {
+    "organization_name": "Om Arham Test",
+    "organization_id": "60062715240",
+    "alerts": [
+      {
+        "workflow_id": "3389404000000033179",
+        "workflow_name": "SendEventtoBilling",
+        "entity": "subscriptions",
+        "status": "active",
+        "is_active": true,
+        "description": "",
+        "applies_to": "all subscription records (no filter rule)",
+        "trigger_events": [
+          "subscription_reactivated",
+          "subscription_unpaid",
+          "subscription_deleted",
+          "subscription_renewed",
+          "subscription_expired",
+          "subscription_cancelled",
+          "subscription_downgraded",
+          "subscription_upgraded",
+          "subscription_activation"
+        ],
+        "actions": [
+          {
+            "action_id": "3389404000000033175",
+            "action_type": "webhook",
+            "action_name": "SendEventtoBilling",
+            "note": "Not an email action - webhook only."
+          }
+        ]
+      }
+    ]
+  },
   "recommended_review_actions": [
     "Decide whether the org needs the standard built-in email notifications (payment receipts, invoice reminders, dunning, subscription renewal/expiry emails) reviewed manually in the Zoho Billing UI (Settings > Automation > Email Notifications), since those aren't visible via API - this inventory only covers custom Workflow alerts.",
     "Confirm with Ashish (or current owner) whether 'ADYTrainingManagement' and 'unpaid to live' workflows are still needed, or can be deleted/reactivated.",
     "Investigate why 'FullEvent' (the only active workflow) shows zero execution history in the last 3 months - verify the webhook destination is still valid.",
-    "None of the 3 existing workflows send email (all action_type = webhook) - if the org expects email notifications for subscription lifecycle events, none currently exist; a new email-type alert would need to be created via 'Create an Email Alert'.",
-    "No alerts exist for Invoice, Customer, Credit Note, Payment, or Quote entities via the Workflow/Alert API - confirm whether that's intentional or whether equivalent behavior is expected to be covered by the (unreadable) standard per-module notifications."
+    "Zero true email-type alerts exist across both orgs (all action_type = webhook) - if the business expects email notifications for subscription/invoice/payment lifecycle events beyond Zoho's standard built-ins, a new email-type alert would need to be created via 'Create an Email Alert' with an email_template and recipients.",
+    "No alerts exist for Invoice, Customer, Credit Note, Payment, or Quote entities via the Workflow/Alert API in the primary org - confirm whether that's intentional or whether equivalent behavior is expected to be covered by the (unreadable) standard per-module notifications."
   ]
 }
