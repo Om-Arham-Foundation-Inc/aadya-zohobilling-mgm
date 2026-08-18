@@ -1,0 +1,129 @@
+{
+  "_meta": {
+    "purpose": "Local inventory of Zoho Billing (Subscriptions) notification/workflow configuration, pulled via the Zoho Billing MCP connector for local review before being pushed back to the application.",
+    "generated_at": "2026-08-18",
+    "source": "Zoho Billing API - Email Alerts (Workflows) endpoint, Email Alert Execution History endpoint",
+    "organization": {
+      "name": "Om Arham Social Welfare Foundation",
+      "organization_id": "60036596424",
+      "is_default_org": true
+    },
+    "other_orgs_in_account_not_covered_by_this_inventory": [
+      {
+        "name": "Om Arham Test",
+        "organization_id": "60062715240"
+      }
+    ],
+    "known_gaps": [
+      "Zoho Billing's standard, built-in transactional email notifications (e.g. Invoice Sent/Overdue reminders, Payment Received/Failed/Refunded, Subscription trial-ending/dunning/renewal reminders, Credit Note, Quote) are configured under Settings > Automation > Email Notifications per module and are NOT exposed for read via the connected MCP tools (no list/get endpoint for per-module default notification templates was available). Only custom Workflow-based alerts (Settings > Automation > Workflows) are readable via the 'List all Email Alerts' API, and are recorded below.",
+      "No 'list products' tool is exposed either, so per-product email template/recipient overrides (settable via the 'Update Product Email Templates' API) could not be enumerated - that endpoint is write-only from this connector and requires a product_id we don't have a way to look up.",
+      "Email alert execution history for the last 3 months (2026-05-01 to 2026-08-18) returned zero entries - none of the workflows below have fired/sent anything recently."
+    ]
+  },
+  "workflow_alerts": [
+    {
+      "workflow_id": "2278898000002540071",
+      "workflow_name": "ADYTrainingManagement",
+      "entity": "subscriptions",
+      "status": "inactive",
+      "is_active": false,
+      "description": "Send webhook events to ADY Training Management - Do Not Modify - Ashish",
+      "rule_type": "combined",
+      "applies_to": "all subscription records (no filter rule)",
+      "trigger_events": [
+        "subscription_reactivated",
+        "subscription_unpaid",
+        "subscription_deleted",
+        "subscription_renewed",
+        "subscription_expired",
+        "subscription_cancelled",
+        "subscription_downgraded",
+        "subscription_upgraded",
+        "subscription_activation"
+      ],
+      "actions": [
+        {
+          "action_id": "2278898000002540067",
+          "action_type": "webhook",
+          "action_name": "ADYTrainingManagement",
+          "note": "Not an email action - delivers a webhook payload, no email template/recipients involved."
+        }
+      ],
+      "review_notes": "Currently inactive. Description explicitly says 'Do Not Modify - Ashish'. Confirm with Ashish/owning team before changing; overlaps in trigger events with the active 'FullEvent' workflow below."
+    },
+    {
+      "workflow_id": "2278898000003168229",
+      "workflow_name": "FullEvent",
+      "entity": "subscriptions",
+      "status": "active",
+      "is_active": true,
+      "description": "Send webhook events to ADY Training Management - Do Not Modify - Ashish",
+      "rule_type": "combined",
+      "applies_to": "all subscription records (no filter rule)",
+      "trigger_events": [
+        "subscription_resumed",
+        "subscription_paused",
+        "billing_date_changed",
+        "subscription_scheduled_cancellation_removed",
+        "subscription_cancellation_scheduled",
+        "subscription_reactivated",
+        "subscription_unpaid",
+        "subscription_renewed",
+        "subscription_expired",
+        "subscription_cancelled",
+        "subscription_downgraded",
+        "subscription_upgraded",
+        "subscription_activation"
+      ],
+      "actions": [
+        {
+          "action_id": "2278898000003168225",
+          "action_type": "webhook",
+          "action_name": "FullEvent",
+          "note": "Not an email action - delivers a webhook payload, no email template/recipients involved."
+        }
+      ],
+      "review_notes": "Only currently-active workflow alert in the org. Also marked 'Do Not Modify - Ashish'. Zero executions recorded in the last 3 months per alert history, which is worth confirming with Ashish - could mean no matching events occurred, or the webhook endpoint/integration is stale."
+    },
+    {
+      "workflow_id": "2278898000003957556",
+      "workflow_name": "unpaid to live",
+      "entity": "subscriptions",
+      "status": "inactive",
+      "is_active": false,
+      "description": "this is to cover unpaid to live",
+      "rule_type": "add_edit",
+      "applies_to_rule": {
+        "criteria_string": "(1 AND 2)",
+        "conditions": [
+          { "field": "previous_subscription_status", "comparator": "equal", "value": "unpaid" },
+          { "field": "subscription_status", "comparator": "equal", "value": "live" }
+        ]
+      },
+      "trigger": "field_update on subscription_status (or condition)",
+      "actions": [
+        {
+          "action_id": "2278898000003957550",
+          "action_type": "webhook",
+          "action_name": "unpaid to live",
+          "note": "Not an email action - delivers a webhook payload, no email template/recipients involved."
+        }
+      ],
+      "review_notes": "Inactive. Fires only when a subscription transitions from 'unpaid' status back to 'live'."
+    }
+  ],
+  "entities_checked_with_no_custom_alerts_found": [
+    "invoice",
+    "customer",
+    "creditnote",
+    "payment",
+    "quote"
+  ],
+  "recommended_review_actions": [
+    "Decide whether the org needs the standard built-in email notifications (payment receipts, invoice reminders, dunning, subscription renewal/expiry emails) reviewed manually in the Zoho Billing UI (Settings > Automation > Email Notifications), since those aren't visible via API - this inventory only covers custom Workflow alerts.",
+    "Confirm with Ashish (or current owner) whether 'ADYTrainingManagement' and 'unpaid to live' workflows are still needed, or can be deleted/reactivated.",
+    "Investigate why 'FullEvent' (the only active workflow) shows zero execution history in the last 3 months - verify the webhook destination is still valid.",
+    "None of the 3 existing workflows send email (all action_type = webhook) - if the org expects email notifications for subscription lifecycle events, none currently exist; a new email-type alert would need to be created via 'Create an Email Alert'.",
+    "No alerts exist for Invoice, Customer, Credit Note, Payment, or Quote entities via the Workflow/Alert API - confirm whether that's intentional or whether equivalent behavior is expected to be covered by the (unreadable) standard per-module notifications."
+  ]
+}
