@@ -22,6 +22,25 @@ If subscribers are getting emails today (payment receipts, renewal reminders, et
 coming from Zoho Billing's **standard built-in per-module notifications**, not from a custom Email
 Alert - and those built-ins aren't readable via this API (see gap below).
 
+## Tool audit (2026-08-18): can we get reports/payments/invoices/subscriptions notifications another way?
+
+Searched the entire Zoho Billing MCP tool surface specifically for a way to read report-schedule,
+payment-reminder, invoice-reminder, subscription-reminder, or org-level notification-preference
+config. Result: **nothing beyond what's already documented here.** Specifically confirmed missing:
+
+- No tool to list/read scheduled or emailed **Reports** (report subscriptions) of any kind.
+- No tool to read the standard per-module notification toggles/templates (invoice reminders,
+  payment receipt/failure emails, subscription trial/renewal/dunning emails, credit note/quote
+  emails) that live under Settings > Automation > Email Notifications.
+- No organization-level notification-preferences endpoint.
+- No `list products` / `search products` tool, which also blocks actually using
+  `Update Product Email Templates` (it needs a `product_id` with no way to look one up).
+
+So the tool surface for notifications is exactly: the Workflow/Email-Alert CRUD tools (used below),
+their execution history, `Update Product Email Templates` (write-only, blocked on product lookup),
+and `Email an Invoice` (one-off send, not a setting). Everything else requires the Zoho Billing web
+UI.
+
 ## What this covers vs. what it doesn't
 
 Zoho Billing has two different kinds of "notifications":

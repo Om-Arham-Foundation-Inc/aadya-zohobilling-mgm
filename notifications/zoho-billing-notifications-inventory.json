@@ -19,6 +19,23 @@
       "Email alert execution history for the last 3 months (2026-05-01 to 2026-08-18) returned zero entries - none of the workflows below have fired/sent anything recently."
     ]
   },
+  "connector_tool_audit": {
+    "performed_at": "2026-08-18",
+    "purpose": "Searched the full Zoho Billing MCP tool surface for any additional way to read report-schedule, payment-reminder, invoice-reminder, subscription-reminder, or organization notification-preference configuration, beyond the Workflow/Email-Alert endpoints already used above.",
+    "tools_found_related_to_notifications": [
+      "List all Email Alerts / Create an Email Alert / Update an Email Alert / Delete an Email Alert / Mark an Email Alert as Active / Mark an Email Alert as Inactive - the Workflow-based alerts already inventoried above",
+      "List all Email Alert Execution History / Get an Email Alert Execution History - execution logs for the above",
+      "Update Product Email Templates - write-only, requires a product_id; no corresponding list/get-products tool exists in this connector to enumerate product_ids",
+      "Email an Invoice - sends one ad-hoc email for a single invoice; not a notification/reminder configuration"
+    ],
+    "confirmed_not_available": [
+      "No tool to read or list scheduled/emailed Reports configuration (report subscriptions) for any report type (payments, invoices, subscriptions, dunning, revenue, etc.)",
+      "No tool to read standard per-module notification toggles/templates (invoice reminders, payment receipt/failure emails, subscription trial/renewal/dunning emails, credit note/quote emails) - these live under Settings > Automation > Email Notifications in the Zoho Billing UI and have no corresponding API surface in this connector",
+      "No organization-level notification-preferences tool (e.g. a settings/preferences GET endpoint)",
+      "No 'list products' or 'search_products' tool, which blocks enumerating product_ids needed to actually use 'Update Product Email Templates'"
+    ],
+    "conclusion": "The workflow_alerts / other_org_workflow_alerts sections below represent the COMPLETE set of notification data retrievable via this Zoho Billing connector. Anything about standard report/payment/invoice/subscription notifications beyond custom Workflow alerts requires a manual check in the Zoho Billing web UI (Settings > Automation > Email Notifications, and Reports > scheduled report exports)."
+  },
   "email_alerts_summary": {
     "true_email_type_alerts_found": 0,
     "explanation": "The 'List all Email Alerts' API returns every Workflow-based alert regardless of its action type (email vs webhook). Across both orgs in this account, every single configured alert has action_type = 'webhook'. Zero alerts have an actual email action (action_type = 'alert' with an email_template). So the true email-alert inventory for this account is currently EMPTY - no custom email alerts exist for any entity (Invoice, Subscription, Customer, Payment, Credit Note, Quote) in either org.",
